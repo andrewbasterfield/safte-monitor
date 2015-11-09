@@ -1,0 +1,19 @@
+Source: safte-monitor
+Section: unknown
+Priority: optional
+Maintainer: Andrew Basterfield <abasterfield@gmail.com>
+Build-Depends: debhelper (>= 9), autotools-dev, m4
+Standards-Version: 3.9.5
+Homepage: https://github.com/andrewbasterfield/safte-monitor.git
+#Vcs-Git: git://github.com/andrewbasterfield/safte-monitor.git
+#Vcs-Browser: http://github.com/andrewbasterfield/safte-monitor.git
+
+Package: safte-monitor
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Linux SAF-TE SCSI enclosure monitor
+ safte-monitor reads disk enclosure status information from SAF-TE capable
+ enclosures (SCSI Accessible Fault Tolerant Enclosures). SAF-TE is common
+ on many intelligent SCSI disk enclosures and some rackmount servers with
+ SCSI hotswap drive bays. safte-monitor can monitor multiple SAF-TE
+ devices and will automatically probe and detect them.
