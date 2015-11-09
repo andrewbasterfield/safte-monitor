@@ -1,0 +1,67 @@
+.TH "SAFTE-MONITOR" "8" "13 February 2005" "" ""
+.SH NAME
+safte-monitor \- Linux SAF-TE SCSI enclosure monitor
+.SH SYNOPSYS
+.sp
+\fBsafte-monitor [ -h ] [ -p ] [-n] [-a] [-T] [-t <max temp>] [-A <alert program>]\rR
+.SH "DESCRIPTION"
+.PP
+safte-monitor reads disk enclosure status information from SAF-TE capable
+enclosures (SCSI Accessible Fault Tolerant Enclosures). SAF-TE is common
+on many SCSI disk enclosures these days. safte-monitor can monitor
+multiple SAF-TE devices and will automatically probe and detect them.
+.PP
+The information retreived includes power supply and fan status,
+temperature, audible alarm, drive faults, array critical / failed /
+rebuilding state and door lock status. safte-monitor logs changes in the
+status of these enclosure elements to syslog and can optionally execute
+an alert help program with details of the component failure. This could
+send a pager message for example. Temperate alert limits also be set.
+.PP
+By default safte-monitor will run in the background and log to syslog.
+.PP
+It can be run in one-shot scan mode to print found SAF-TE device info using
+the /fB-p/fR flag. It will also respond to web requests on port 8123 (default)
+and display HTML output of enclosure status.
+.SH "OPTIONS"
+.TP
+\fB-h\fR
+show this help message
+.TP
+\fB-p\fR
+Print device scan information then exit
+.TP
+\fB-T\fR
+Log temperature changes
+.TP
+\fB-N\fR
+Alert for non critical state changes
+.TP
+\fB-A <alert program>\fR
+Program to run for alerts
+.TP
+\fB-t <max temp>\fR
+Max temperature (default 35.0 celcius)
+.TP
+\fB-n\fR
+Use numeric sg device names eg. /dev/sg0 (default)
+.TP
+\fB-a\fR
+Use alphanumeric sg device names eg. /dev/sga
+.SH "FILES"
+.TP
+\fB\fI/etc/safte-monitor.conf\fB\fR
+Configuration file for safte-monitor.
+.TP
+\fB\fI/etc/safte-monitor.passwd\fB\fR
+Password file for the web interface.
+.TP
+\fB\fI/etc/init.d/safte-monitor\fB\fR
+Initialization script.
+.TP
+\fB\fI/usr/lib/safte-monitor/alert\fB\fR
+Default alert script.
+.SH "AUTHOR"
+safte-monitor is written by Michael Clark <michael@metaparadigm.com>
+.SH "COPYRIGHT"
+Copyright Metaparadigm Pte. Ltd. 2005.

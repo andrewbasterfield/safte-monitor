@@ -1,0 +1,27 @@
+Changelog
+
+0.0.1 - initial version. can scan and read enclosure information
+0.0.2 - first production version - changed named to saftemon
+        moved generic SCSI code into seperate file
+        added daemon mode with background scanning and status change logging
+0.0.3 - added rebuilding, critical array, failed array sensing, etc to
+	drive slot status
+0.0.4 - added internal HTTPD and web status display
+	added RPM spec file and RPM target to Makefile
+0.0.5 - renamed to safte-monitor due to trademark issue
+        "SAFTEMON" is a registered trademark of StorCase Technology Inc.
+	fixed small bug so alpha flag is honoured on /dev/sg? devices
+0.0.6 - fixed a few compile warnings
+	Moved alert program to lib/safte-monitor instead of
+	libexec/safte-monitor
+	Changed location of safte-monitor from bin to sbin
+	Added debian package build rules
+	Fix 2.6 bug - extend size of buffer space for SCSI_IOCTL_GET_PCI ioctl
+	Change rpm target to use rpmbuild - John Fusco <John.Fusco@med.ge.com>
+	Allow setting RPM_ROOT - John Fusco <John.Fusco@med.ge.com>
+1.0.0 - Read celcius flag in high bit of  "number of thermostats" field
+        John Fusco, John.Fusco at med dot ge dot com
+      - Fix offset bug in reading doorlock and speaker fields
+        Kevin Corbin
+      - Add safte-monitor manpage
+      - Make install directories FHS compliant

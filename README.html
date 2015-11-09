@@ -1,0 +1,134 @@
+    <link rel='stylesheet' type='text/css' href='/site.css'>
+    <h2>safte-monitor - Linux SAF-TE SCSI enclosure monitor</h2>
+    <p>Latest release: <a href="safte-monitor-1.0.0rc1.tar.gz">safte-monitor-1.0.0rc1.tar.gz</a></p>
+<p>
+safte-monitor reads disk enclosure status information from SAF-TE capable
+enclosures (SCSI Accessible Fault Tolerant Enclosures). SAF-TE is common
+on many intelligent SCSI disk enclosures and some rackmount servers with
+SCSI hotswap drive bays. safte-monitor can monitor multiple SAF-TE
+devices and will automatically probe and detect them.
+</p><p>
+The information retreived includes power supply, fan, temperature, audible
+alarm, drive faults, array critical / failed / rebuilding state and door
+lock status. safte-monitor logs changes in the status of these enclosure
+elements to syslog and can optionally execute an alert help program with
+details of the component failure. This could send a pager message
+for example. Temperature alert limits can also be set.
+</p><p>
+safte-monitor is specifcally useful if you have equipment deployed in
+remote locations or unattended over weekends when no-one may hear an
+audible alarm.
+</p>
+<pre>usage:	./safte-monitor [-h] [-p] [-n] [-a] [-T] [-t &lt;max_temp>] [-A &lt;alert_prog>]
+
+-h     show this help message
+-p     print - print device scan information then exit
+-T     log temperature changes
+-N     alert for non critical state changes
+-A &lt;f> program to run for alerts
+-t &lt;n> max temperature (default 35.0 celcius)
+-n     numeric sg device names eg. /dev/sg0 (default)
+-a     alpha sg device names eg. /dev/sga</pre>
+    <p>By default temperatures and temperature limits are in Celcius. This
+    can be changed to Farenheit by removing the -DUSE_CELCIUS from the
+    Makefile.</p>
+    <h3>Example alert helper program:</h3>
+<pre>#!/bin/sh
+echo ALERT device=$1 message=$2 system=$3 partno=$4 code=$5 | \
+	mail -s 'safte alert' root</pre>
+    <h3>Example output from a scan</h3>
+<pre># ./safte-monitor -p
+SAF-TE Device ESG-SHV SCA HSBP M10 (0:0:6:0)
+no. of fans           = 0
+no. of power supplies = 1
+no. of device slots   = 4
+door lock installed   = 0
+no. of temp sensors   = 1
+audible alarm         = 0
+no. of thermostats    = 0
+power supply 0 is okay and on
+device slot 0 disk present,active,unconfigured
+device slot 1 insert ready
+device slot 2 insert ready
+device slot 3 insert ready
+temp sensor 0 is 25.0 celcius and okay
+overall temperature is okay
+
+SAF-TE Device CNSi G8324 (2:0:0:50)
+no. of fans           = 4
+no. of power supplies = 2
+no. of device slots   = 6
+door lock installed   = 1
+no. of temp sensors   = 3
+audible alarm         = 1
+no. of thermostats    = 0
+power supply 0 is okay and on
+power supply 1 is okay and on
+fan 0 is operational
+fan 1 is operational
+fan 2 is operational
+fan 3 is operational
+device slot 0 disk not present,no error
+device slot 1 disk not present,no error
+device slot 2 disk not present,no error
+device slot 3 disk present,no error
+device slot 4 disk present,no error
+device slot 5 disk present,no error
+door lock is locked
+speaker is off
+temp sensor 0 is 25.6 celcius and okay
+temp sensor 1 is 25.6 celcius and okay
+temp sensor 2 is 21.7 celcius and okay
+overall temperature is okay</pre>
+    <h3>Example syslog messages</h3>
+<p>a temperature change (if option is selected to log temp changes)</p>
+<pre>SAF-TE Device CNSi G8324 (2:0:0:52): temp sensor 2 changed from '23.9 degrees' to '22.8 degrees'</pre>
+<p>a power supply failing</p>
+<pre>SAF-TE Device CNSi G8324 (2:0:0:51): power supply 1 changed from 'okay and on' to 'malfunctioning and commanded on'
+SAF-TE Device CNSi G8324 (2:0:0:51): ALERT power supply 1 malfunctioning and commanded on</pre>
+<p>the power supply back up again</p>
+<pre>SAF-TE Device CNSi G8324 (2:0:0:51): power supply 1 changed from 'malfunctioning and commanded on' to 'okay and on'</pre>
+<p>a drive in an array fails</p>
+<pre>SAF-TE Device CNSi G8324 (2:0:0:51): device slot 4 changed from 'disk present,no error' to 'disk present,critical array'
+SAF-TE Device CNSi G8324 (2:0:0:51): ALERT device slot 4 is disk present,critical array
+SAF-TE Device CNSi G8324 (2:0:0:51): device slot 5 changed from 'disk present,no error' to 'disk present,faulty'
+SAF-TE Device CNSi G8324 (2:0:0:51): ALERT device slot 5 is disk present,faulty</pre>
+<p>after a rebuild has been started</p>
+<pre>SAF-TE Device CNSi G8324 (2:0:0:51): device slot 4 changed from 'disk present,critical array' to 'disk present,rebuilding,critical array'
+SAF-TE Device CNSi G8324 (2:0:0:51): ALERT device slot 4 is disk present,rebuilding,critical array
+SAF-TE Device CNSi G8324 (2:0:0:51): device slot 5 changed from 'disk present,faulty' to 'disk present,rebuilding,critical array'
+SAF-TE Device CNSi G8324 (2:0:0:51): ALERT device slot 5 is disk present,rebuilding,critical array</pre>
+<p>and now the array is okay again</p>
+<pre>SAF-TE Device CNSi G8324 (2:0:0:51): device slot 4 changed from 'disk present,rebuilding,critical array' to 'disk present,no error'
+SAF-TE Device CNSi G8324 (2:0:0:51): device slot 5 changed from 'disk present,rebuilding,critical array' to 'disk present,no error'</pre>
+    <h3>Bugs</h3>
+    <ul>
+      <li>Sometimes doesn't probe devices on first startup if sg module isn't loaded</li>
+    </ul>
+    <p>Please send bug reports to <a href="mailto:michael@metaparadigm.com">michael@metaparadigm.com</a></p>
+    <h3>Anonymous CVS</h3>
+    <p><code># <b>export CVSROOT=:pserver:anoncvs@cvs.metaparadigm.com:/cvsroot</b><br>
+    # <b>cvs login</b><br>
+    Logging in to :pserver:anoncvs@cvs.metaparadigm.com:2401/cvsroot<br>
+    CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
+    # <b>cvs co safte-monitor</b></code></p>
+    <h3>To do</h3>
+    <ul>
+    <li>Make celcius/farenheit a command line option.</li>
+    <li>Set temp limits seperately for different enclosures or individual
+    sensors.</li>
+    <li>implement SNMP traps for alerts - this could be done with an external
+    alert helper program.</li>
+    <li>Add a remote interface for checking status (SNMP)</li>
+    <li>Add mon compatible service test agent</li>
+    <li>Finish off autoconfigure support</li>
+    <li>Make safte-monitor dynamically rescan for safte devices after startup to
+  eliminate the need for a restart to the daemon</li>
+    <li>Integrate with software RAID</li>
+    </ul>
+    <p>The SAF-TE spec can be found <a href="http://www.intel.com/design/servers/ipmi/saf-te.htm">here</a>.</p>
+    <p>Copyright Metaparadigm Pte. Ltd. 2001-2005. <a href="mailto:michael@metaparadigm.com">Michael Clark</a></p>
+    <p>This program is free software; you can redistribute it and/or modify
+      it under the terms of the GNU General Public License version 2 as published
+      by the Free Software Foundation.</p>
+<hr>

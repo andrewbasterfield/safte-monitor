@@ -1,0 +1,179 @@
+#
+#  safte-monitor - SCSI enclosure monitor
+#
+#  Author: Michael Clark <michael@metaparadigm.com>
+#  Copyright Metaparadigm Pte. Ltd. 2001
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+
+VERSION	= 1.0.0rc1
+
+SAFTEMON_USER = @safte_monitor_user@
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+# need to get @PACKAGE@ working
+pkgdatadir = $(datadir)/safte-monitor
+pkglibdir = $(libdir)/safte-monitor
+
+top_builddir = .
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+
+# C Flags
+CFLAGS			+= -DUSE_CELCIUS
+CFLAGS			+= -DHAVE_CRYPT_H
+CFLAGS			+= -Wall -O2 -Isrc -I$(MATHOPD_DIR) \
+		-DSAFTE_MONITOR_VERSION="\"$(VERSION)\"" \
+		-DMATHOPD_CONF="\"$(sysconfdir)/safte-monitor.conf\""
+
+
+# Build files
+BIN_FILES		= src/safte-monitor
+CONF_FILES		= etc/safte-monitor.conf etc/safte-monitor.passwd
+MAN8_FILES		= man/safte-monitor.8
+WWW_FILES		= lib/www/monitor.safte lib/www/index.url \
+			  lib/www/safte-monitor.css lib/www/wpixel.gif
+ALERT_FILES		= lib/alert
+
+MATHOPD_DIR		= mathopd-1.3pl7-lite
+
+SAFTEMON_OBJS		= src/safte-monitor.o \
+			  src/scsi_api.o
+MATHOPD_OBJS		= $(MATHOPD_DIR)/base64.o $(MATHOPD_DIR)/config.o \
+			  $(MATHOPD_DIR)/core.o $(MATHOPD_DIR)/main.o \
+			  $(MATHOPD_DIR)/request.o $(MATHOPD_DIR)/util.o \
+			  $(MATHOPD_DIR)/redirect.o
+
+M4_DEFINES		= -D_exec_prefix_=$(exec_prefix) \
+			  -D_sbindir_=$(sbindir) \
+			  -D_sysconfdir_=$(sysconfdir) \
+			  -D_localstatedir_=$(localstatedir) \
+			  -D_pkgdatadir_=$(pkgdatadir) \
+			  -D_pkglibdir_=$(pkglibdir)
+
+
+# Build targets
+
+all: $(BIN_FILES) $(ALERT_FILES) $(CONF_FILES)
+
+clean:
+	rm -f $(BIN_FILES) $(SAFTEMON_OBJS) $(MATHOPD_OBJS) \
+		$(RPM_SPEC_FILE) etc/safte-monitor.conf \
+		&& find . -name '*~' | xargs rm -f
+
+install: all
+	$(srcdir)/mkinstalldirs $(DESTDIR)$(sbindir) \
+		$(DESTDIR)$(sysconfdir) \
+		$(DESTDIR)$(pkgdatadir)/www \
+		$(DESTDIR)$(pkglibdir) \
+		$(DESTDIR)$(mandir)/man8 \
+		$(DESTDIR)$(localstatedir)/log/safte-monitor \
+		$(DESTDIR)$(localstatedir)/run/safte-monitor
+	$(INSTALL_PROGRAM) $(BIN_FILES) $(DESTDIR)$(sbindir)
+	$(INSTALL_PROGRAM) $(ALERT_FILES) $(DESTDIR)$(pkglibdir)
+	$(INSTALL_DATA) $(CONF_FILES) $(DESTDIR)$(sysconfdir)
+	$(INSTALL_DATA) $(WWW_FILES) $(DESTDIR)$(pkgdatadir)/www
+	$(INSTALL_DATA) $(MAN8_FILES) $(DESTDIR)$(mandir)/man8
+
+
+# Build Dependencies
+
+src/safte-monitor.o: src/safte-monitor.c src/safte-monitor.h src/scsi_api.h
+src/scsi_api.o: src/scsi_api.c src/scsi_api.h
+
+etc/safte-monitor.conf: etc/safte-monitor.conf.m4
+	m4 $(M4_DEFINES) $< > $@
+
+$(MATHOPD_OBJS): $(MATHOPD_DIR)/mathopd.h
+
+src/safte-monitor: $(SAFTEMON_OBJS) $(MATHOPD_OBJS)
+
+
+# Build dist from CVS checkout
+dist:	clean
+	rm -f Makefile config.cache config.log config.status
+	rm -f ../safte-monitor-$(VERSION)
+	ln -s safte-monitor ../safte-monitor-$(VERSION)
+	cd .. && tar --exclude CVS --exclude redhat --exclude debian \
+		-chvzf safte-monitor-$(VERSION).tar.gz \
+		safte-monitor-$(VERSION)
+	rm -f ../safte-monitor-$(VERSION)
+
+# Maintainer targets to build rpm and deb from CVS checkout
+# (requires redhat and debian dirs which aren't included in the source archive)
+
+RPM_BUILD_TMP		= ../safte-monitor-rpm-build
+DEB_BUILD_TMP		= ../safte-monitor-deb-build
+
+RPM_ROOT		= /usr/src/redhat
+RPM_VERSION		= $(VERSION)
+RPM_RELEASE		= 1
+RPM_PATCH		= safte-monitor-$(VERSION).patch
+RPM_SPEC_SRC		= redhat/safte-monitor.spec.m4
+RPM_SPEC_FILE		= safte-monitor-$(RPM_VERSION)-$(RPM_RELEASE).spec
+
+rpm:
+	# create patch for redhat dir
+	rm -fr $(RPM_BUILD_TMP) && \
+	    mkdir $(RPM_BUILD_TMP) && \
+	    cd $(RPM_BUILD_TMP) && \
+	    tar xzf ../safte-monitor-$(VERSION).tar.gz && \
+	    mv safte-monitor-$(VERSION) safte-monitor-$(VERSION).rh && \
+	    tar xzf ../safte-monitor-$(VERSION).tar.gz
+	tar cf - redhat | \
+	    ( cd $(RPM_BUILD_TMP)/safte-monitor-$(VERSION).rh && \
+	      tar --exclude CVS --exclude '*.spec.m4' -xf -)
+	-cd $(RPM_BUILD_TMP) && diff -urN safte-monitor-$(VERSION) \
+		safte-monitor-$(VERSION).rh > $(RPM_ROOT)/SOURCES/$(RPM_PATCH)
+	# make spec file and copy source
+	m4 -D_rpm_version_=$(RPM_VERSION) -D_rpm_release_=$(RPM_RELEASE) \
+		$(RPM_SPEC_SRC) > $(RPM_ROOT)/SOURCES/$(RPM_SPEC_FILE)
+	cp ../safte-monitor-$(VERSION).tar.gz $(RPM_ROOT)/SOURCES
+	# build it
+	rpmbuild -ba --define _topdir\{$(RPM_ROOT)\} \
+		$(RPM_ROOT)/SOURCES/$(RPM_SPEC_FILE)
+
+deb:
+	rm -fr $(DEB_BUILD_TMP) && \
+	    mkdir $(DEB_BUILD_TMP) && \
+	    cd $(DEB_BUILD_TMP) && \
+	    tar xzf ../safte-monitor-$(VERSION).tar.gz
+	tar cf - debian | \
+	    ( cd $(DEB_BUILD_TMP)/safte-monitor-$(VERSION) && \
+	      tar --exclude CVS -xf -)
+	cp ../safte-monitor-$(VERSION).tar.gz  \
+	    $(DEB_BUILD_TMP)/safte-monitor_$(VERSION).orig.tar.gz
+	cd $(DEB_BUILD_TMP)/safte-monitor-$(VERSION) && \
+	    fakeroot dpkg-buildpackage
+	cd $(DEB_BUILD_TMP) && rm -fr safte-monitor-$(VERSION) && \
+	  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz && \
+	  dpkg-scansources . /dev/null | gzip -9c > Sources.gz
