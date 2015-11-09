@@ -508,7 +508,7 @@ static void log_status_change(safte_device_t *saftedev,
 	       status_str(system, oldcode),
 	       status_str(system, newcode));
 
-  syslog(LOG_INFO, message);
+  syslog(LOG_INFO, "%s", message);
 
   if((status_severity(system, newcode) > 0 || alert_noncrit) &&
      newcode != oldcode )
@@ -537,7 +537,7 @@ static void log_slot_status_change(safte_device_t *saftedev, int partno,
 	       system_name(SAFTE_SLOT_BYTE3_STATUS), partno,
 	       old_slotmsg, new_slotmsg);
 
-  syslog(LOG_INFO, message);
+  syslog(LOG_INFO, "%s", message);
 
   if((slot_status_severity(newbyte0, newbyte3) > 0 || alert_noncrit) &&
      (newbyte0 != oldbyte0 || newbyte3 != oldbyte3) )
@@ -556,7 +556,7 @@ static void log_temp_change(safte_device_t *saftedev,
 	    "'%0.1f degrees' to '%0.1f degrees'",
 	    safte_name(saftedev), sensorno, oldtemp, newtemp);
 
-    syslog(LOG_INFO, message);
+    syslog(LOG_INFO, "%s", message);
   }
 
   if(newtemp >= max_temp && oldtemp < max_temp)
@@ -968,7 +968,7 @@ int process_safte(struct request *r)
     print_safte_dev_info_html(fp, saftedev);
     saftedev = saftedev->next;
   }
-  fprintf(fp, response_ftr);
+  fprintf(fp, "%s", response_ftr);
   fclose(fp);
 
   return -1;

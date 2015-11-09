@@ -35,7 +35,7 @@
 
 /* Aja */
 
-static const char rcsid[] = "$Id: base64.c,v 1.1.1.1 2002/04/20 10:26:44 mclark Exp $";
+// static const char rcsid[] = "$Id: base64.c,v 1.1.1.1 2002/04/20 10:26:44 mclark Exp $";
 
 #include "mathopd.h"
 
@@ -61,7 +61,7 @@ void base64initialize(void)
 	b64['='] = 0;
 }
 
-static int base64decode(const unsigned char *encoded, unsigned char *decoded)
+static int base64decode(const char *encoded, char *decoded)
 {
 	register int c;
 	register unsigned char t1, t2, u1, u2, u3;

@@ -35,7 +35,7 @@
 
 /* Mysterons */
 
-static const char rcsid[] = "$Id: request.c,v 1.3 2004/01/21 14:58:41 mclark Exp $";
+//static const char rcsid[] = "$Id: request.c,v 1.3 2004/01/21 14:58:41 mclark Exp $";
 
 #include "mathopd.h"
 

@@ -35,7 +35,7 @@
 
 /* Les trois soers aveugles */
 
-static const char rcsid[] = "$Id: core.c,v 1.2 2002/07/31 12:40:02 mclark Exp $";
+//static const char rcsid[] = "$Id: core.c,v 1.2 2002/07/31 12:40:02 mclark Exp $";
 
 #include "mathopd.h"
 
@@ -132,7 +132,8 @@ static void nuke_connections(void)
 static void accept_connection(struct server *s)
 {
 	struct sockaddr_in sa;
-	int lsa, fd, rv;
+	socklen_t lsa;
+	int fd, rv;
 	struct connection *cn, *cw;
 
 	do {

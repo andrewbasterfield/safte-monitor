@@ -35,7 +35,7 @@
 
 /* Once Around */
 
-static const char rcsid[] = "$Id: main.c,v 1.3 2005/02/13 23:13:08 mclark Exp $";
+//static const char rcsid[] = "$Id: main.c,v 1.3 2005/02/13 23:13:08 mclark Exp $";
 
 #include "mathopd.h"
 

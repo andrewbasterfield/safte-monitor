@@ -35,7 +35,7 @@
 
 /* San Jacinto */
 
-static const char rcsid[] = "$Id: util.c,v 1.1.1.1 2002/04/20 10:26:45 mclark Exp $";
+//static const char rcsid[] = "$Id: util.c,v 1.1.1.1 2002/04/20 10:26:45 mclark Exp $";
 
 #include "mathopd.h"
 
