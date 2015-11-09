@@ -211,7 +211,7 @@ static char *rfctime(time_t t, char *buf)
 	return buf;
 }
 
-static char *getline(struct pool *p)
+static char *__getline(struct pool *p)
 {
 	register char *s;
 	char *olds, *sp, *end;
@@ -248,7 +248,7 @@ static char *getline(struct pool *p)
 			break;
 		}
 	}
-	log_d("getline: fallen off the end");
+	log_d("__getline: fallen off the end");
 	return 0;
 }
 
@@ -755,7 +755,7 @@ static int process_headers(struct request *r)
 	time_t i;
 
 	while (1) {
-		l = getline(r->cn->input);
+		l = __getline(r->cn->input);
 		if (l == 0) {
 			return -1;
 		}
@@ -783,7 +783,7 @@ static int process_headers(struct request *r)
 		r->args = s + 1;
 		*s = 0;
 	}
-	while ((l = getline(r->cn->input)) != 0) {
+	while ((l = __getline(r->cn->input)) != 0) {
 		s = strchr(l, ':');
 		if (s == 0)
 			continue;
